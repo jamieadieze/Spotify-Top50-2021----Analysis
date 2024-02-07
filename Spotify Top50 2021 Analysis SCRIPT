@@ -1,0 +1,73 @@
+-- What were the 10 most popular songs?
+SELECT id, artist_name, track_name, popularity
+FROM BIT_DB.Spotifydata
+ORDER BY popularity desc LIMIT 10;
+
+-- Which song is most likely to perform the best on TikTok due to having the highest danceability?
+SELECT id, artist_name, track_name, MAX(danceability)
+FROM BIT_DB.Spotifydata
+//
+SELECT id, artist_name, track_name, danceabilitY
+FROM BIT_DB.Spotifydata
+ORDER BY danceability desc LIMIT 1;
+
+-- For the top 5 songs that ranked highest in terms of popularity, what was the average tempo of the beats?
+SELECT AVG(tempo) AS average_tempo
+FROM (SELECT tempo FROM Spotifydata ORDER BY popularity desc LIMIT 5) 
+AS top_songs;
+
+SELECT *
+FROM BIT_DB.Spotifydata 
+ORDER BY popularity desc LIMIT 5;
+
+-- According to Tempo, can you create a new column that categorises each song using the Italian tempo indicators i.e., Grave – slow and solemn (20–40 BPM), Lento – slowly (40–45 BPM) etc.
+SELECT id, artist_name, track_name, tempo AS tempo_BPM, 
+CASE WHEN tempo >= 178 THEN 'Prestissimo'
+WHEN tempo >= 168 THEN 'Presto'
+WHEN tempo >= 132 THEN 'Vivace'
+WHEN tempo >= 109 THEN 'Allegro'
+WHEN tempo >= 98 THEN 'Allegretto'
+WHEN tempo >= 86 THEN 'Moderato' 
+WHEN tempo >= 73 THEN 'Adante'
+WHEN tempo >= 65 THEN 'Adagietto'
+ELSE 'Slow' 
+END AS tempo_style
+FROM BIT_DB.Spotifydata;
+
+-- What was the average duration (in milliseconds) of each song in the Spotify Top50?
+SELECT sum(duration_ms)/count(*)
+FROM BIT_DB.Spotifydata;
+
+-- Olivia Rodrigo ended 2021 as the bestselling artist worldwide. How many songs did she have in the Spotify top50.
+SELECT count(*)
+FROM BIT_DB.Spotifydata
+WHERE artist_name IN (SELECT artist_name FROM BIT_DB.Spotifydata WHERE artist_name ='Olivia Rodrigo');
+
+SELECT count(track_name)
+FROM (SELECT * FROM Spotifydata WHERE artist_name ='Olivia Rodrigo');
+
+-- Can you highlight the songs within the Spotify Top50 that did not have a feature?
+SELECT id, artist_name, track_name
+FROM BIT_DB.Spotifydata
+WHERE track_name not like '%with%'
+AND track_name not like '%feat%';
+
+-- Can you highlight the songs within the Spotify Top50 that did have a feature?
+SELECT id, artist_name, track_name
+FROM BIT_DB.Spotifydata
+WHERE track_name like '%with%'
+OR track_name like '%feat%';
+
+-- Calculate the average popularity for the artists in the Spotify data table. 
+-- Then, for every artist with an average popularity of 90 or above, show their name,
+--their average popularity, and label them as a “Top Star”.
+
+WITH tempTable AS (SELECT DISTINCT artist_name, AVG(popularity) AS average_popularity
+FROM Spotifydata
+GROUP BY artist_name)
+
+SELECT artist_name, average_popularity, 
+CASE WHEN average_popularity >= 90 THEN 'Top Star'
+ELSE '-'
+END AS celebrity_status
+FROM tempTable;
